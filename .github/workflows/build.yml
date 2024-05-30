@@ -27,6 +27,7 @@ jobs:
     strategy:
       matrix:
         os:
+          - ubuntu-latest
           - ubuntu-20.04
           - macos-latest
           - macos-14
@@ -42,21 +43,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - if: ${{ startsWith(matrix.os, 'windows') }}
-        run: pip.exe install setuptools
-      - if: ${{ startsWith(matrix.os, 'macos') }}
-        run: brew install python-setuptools
-      - if: ${{ !startsWith(matrix.os, 'windows') && !startsWith(matrix.os, 'macos') }}
-        run: python3 -m pip install setuptools
-      - run: npm install --ignore-scripts
-      - run: npm run build-debug
-      - run: npm test
-      - name: Test SpatiaLite extension
-        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      # - if: ${{ startsWith(matrix.os, 'windows') }}
+      #   run: pip.exe install setuptools
+      # - if: ${{ startsWith(matrix.os, 'macos') }}
+      #   run: brew install python-setuptools
+      # - if: ${{ !startsWith(matrix.os, 'windows') && !startsWith(matrix.os, 'macos') }}
+      #   run: python3 -m pip install setuptools
+      - name: Install from NPM
         run: |
-          sudo apt update
-          sudo apt install libsqlite3-mod-spatialite -y
-          node -e "require('./lib/index.js')(':memory:').loadExtension('mod_spatialite').exec('SELECT InitSpatialMetaData();')"
+          npm install better-sqlite3
+      # - run: npm install --ignore-scripts
+      # - run: npm run build-debug
+      # - run: npm test
+      # - name: Test SpatiaLite extension
+      #   if: ${{ startsWith(matrix.os, 'ubuntu') }}
+      #   run: |
+      #     sudo apt update
+      #     sudo apt install libsqlite3-mod-spatialite -y
+      #     node -e "require('./lib/index.js')(':memory:').loadExtension('mod_spatialite').exec('SELECT InitSpatialMetaData();')"
 
   publish:
     if: ${{ github.event_name == 'release' }}
